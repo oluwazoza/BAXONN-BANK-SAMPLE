@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BAXONN BANK - Create account</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-page">
+  <main class="login-card">
+    <h1>BAXONN BANK</h1>
+    <p class="muted">Create your demo account.</p>
+    <form id="register-form">
+      <label for="name">Full name</label>
+      <input id="name" type="text" required>
+      <label for="email">Email</label>
+      <input id="email" type="email" required>
+      <label for="password">Password</label>
+      <input id="password" type="password" minlength="8" placeholder="At least 8 characters" required>
+      <p id="reg-msg" class="error" hidden></p>
+      <button type="submit" class="btn">Create account</button>
+    </form>
+    <p class="muted">Already have an account? <a href="index.html">Log in</a></p>
+  </main>
+  <script>
+    document.getElementById("register-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById("reg-msg");
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: document.getElementById("name").value,
+          email: document.getElementById("email").value,
+          password: document.getElementById("password").value
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        msg.textContent = data.error;
+        msg.hidden = false;
+        return;
+      }
+      window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>

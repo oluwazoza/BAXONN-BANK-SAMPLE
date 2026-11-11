@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BAXONN BANK - Staff chat</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    [hidden] { display: none !important; }
+    .admin { max-width: 900px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 260px 1fr; gap: 16px; }
+    .conv-list { list-style: none; margin: 0; padding: 0; }
+    .conv-list button { width: 100%; text-align: left; padding: 10px; background: var(--white); border: 1px solid var(--line); border-radius: 8px; margin-bottom: 8px; cursor: pointer; font-size: 1rem; }
+    .conv-list button.active { border-color: var(--pine); background: #e9efe9; }
+    .conv-list small { display: block; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #thread { min-height: 300px; max-height: 55vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    @media (max-width: 700px) { .admin { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main id="admin-login" class="login-page">
+    <div class="login-card">
+      <h1>Staff chat</h1>
+      <p class="muted">Enter the staff password shown in the server terminal.</p>
+      <form id="admin-login-form">
+        <label for="admin-pass">Staff password</label>
+        <input id="admin-pass" type="password" required>
+        <p id="admin-login-msg" class="error" hidden></p>
+        <button type="submit" class="btn">Open inbox</button>
+      </form>
+    </div>
+  </main>
+
+  <div id="inbox" hidden>
+    <header class="topbar">
+      <strong>BAXONN BANK staff chat</strong>
+      <button id="admin-logout" class="btn-link">Log out</button>
+    </header>
+    <div class="admin">
+      <aside>
+        <h2>Customers</h2>
+        <ul id="conv-list" class="conv-list"></ul>
+        <p id="no-conv" class="muted">No chats yet.</p>
+      </aside>
+      <section class="panel">
+        <h2 id="thread-title">Select a customer</h2>
+        <div id="thread"></div>
+        <form id="reply-form" class="chat-form" hidden>
+          <input id="reply-input" type="text" maxlength="500" placeholder="Type a reply" required>
+          <button type="submit" class="btn">Send</button>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let socket = null;
+    let selected = null;
+
+    async function getJson(url, body) {
+      const options = body === undefined
+        ? {}
+        : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+      const res = await fetch(url, options);
+      let data = {};
+      try { data = await res.json(); } catch (e) {}
+      return { ok: res.ok, data: data };
+    }
+
+    function addMsg(m) {
+      const p = document.createElement("p");
+      p.className = "msg " + (m.sender === "agent" ? "me" : "agent");
+      p.textContent = m.text;
+      $("thread").append(p);
+      $("thread").scrollTop = $("thread").scrollHeight;
+    }
+
+    async function loadConversations() {
+      const r = await getJson("/api/admin/conversations");
+      if (!r.ok) return;
+      const list = $("conv-list");
+      list.replaceChildren();
+      $("no-conv").hidden = r.data.length > 0;
+      r.data.forEach((c) => {
+        const li = document.createElement("li");
+        const b = document.createElement("button");
+        if (c.user_id === selected) b.className = "active";
+        const n = document.createElement("strong");
+        n.textContent = c.name;
+        const s = document.createElement("small");
+        s.textContent = c.last_text;
+        b.append(n, s);
+        b.addEventListener("click", () => openThread(c));
+        li.append(b);
+        list.append(li);
+      });
+    }
+
+    async function openThread(c) {
+      selected = c.user_id;
+      $("thread-title").textContent = c.name + " (" + c.email + ")";
+      $("reply-form").hidden = false;
+      $("thread").replaceChildren();
+      const r = await getJson("/api/admin/messages/" + c.user_id);
+      if (r.ok) r.data.forEach(addMsg);
+      loadConversations();
+    }
+
+    function startInbox() {
+      $("admin-login").hidden = true;
+      $("inbox").hidden = false;
+      loadConversations();
+      socket = io();
+      socket.on("agent:message", (m) => {
+        if (m.user_id === selected) addMsg(m);
+        loadConversations();
+      });
+    }
+
+    $("admin-login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const r = await getJson("/api/admin-login", { password: $("admin-pass").value });
+      if (!r.ok) {
+        $("admin-login-msg").textContent = r.data.error || "Login failed.";
+        $("admin-login-msg").hidden = false;
+        return;
+      }
+      startInbox();
+    });
+
+    $("reply-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = $("reply-input").value.trim();
+      if (!text || selected === null) return;
+      socket.emit("agent:reply", { userId: selected, text: text });
+      $("reply-input").value = "";
+    });
+
+    $("admin-logout").addEventListener("click", async () => {
+      await getJson("/api/admin-logout", {});
+      location.reload();
+    });
+
+    getJson("/api/admin-me").then((r) => { if (r.ok) startInbox(); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BAXONN BANK - Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <strong>BAXONN BANK</strong>
+        <span id="welcome"></span>
+    <button id="logout" class="btn-link">Log out</button>
+  </header>
+
+  <main class="dashboard">
+    <section class="balance">
+      <p class="muted">Available balance</p>
+      <p id="balance" class="amount">$500,000.00</p>
+      <p class="muted"><span class="user-name-caps"></span>. Checking Account.</p>
+    </section>
+
+    <nav class="actions" aria-label="Actions">
+      <button class="action active" data-panel="send-panel">Send money</button>
+            <button class="action" data-panel="receive-panel">Receive money</button>
+      <button class="action" data-panel="stock-panel">Buy stock</button>
+      <button class="action" data-panel="card-panel">Card</button>
+    </nav>
+
+    <section id="send-panel" class="panel">
+      <h2>Send money</h2>
+      <form id="transfer-form">
+        <label for="acct">Account number</label>
+        <input id="acct" type="text" inputmode="numeric" maxlength="10" placeholder="10-digit account number" required>
+                <label for="routing">Routing number</label>
+        <input id="routing" type="text" inputmode="numeric" maxlength="9" placeholder="9-digit routing number" required>
+        <label for="bank">Bank</label>
+        <select id="bank" required>
+          <option value="">Select bank</option>
+          <option>Access Bank</option>
+                    <option>BAXONN BANK</option>
+          <option>Fidelity Bank</option>
+          <option>First Bank</option>
+          <option>GTBank</option>
+          <option>Kuda</option>
+          <option>Moniepoint</option>
+          <option>Opay</option>
+          <option>Palmpay</option>
+          <option>Stanbic IBTC</option>
+          <option>Sterling Bank</option>
+          <option>UBA</option>
+          <option>Union Bank</option>
+          <option>Wema Bank</option>
+          <option>Zenith Bank</option>
+        </select>
+        <label for="amt">Amount ($)</label>
+        <input id="amt" type="number" min="1" step="0.01" placeholder="0.00" required>
+        <p id="transfer-msg" class="error" hidden></p>
+        <button type="submit" class="btn">Send money</button>
+      </form>
+    </section>
+        <section id="receive-panel" class="panel" hidden>
+      <h2>Receive money</h2>
+      <p class="muted">Share these details to receive a transfer.</p>
+      <dl class="details">
+        <dt>Account name</dt>
+        <dd class="user-name"></dd>
+        <dt>Account number</dt>
+               <dd class="acct-number"></dd>
+        <dt>Routing number</dt>
+                <dd class="routing-number"></dd>
+        <dt>Bank name</dt>
+        <dd>BAXONN BANK</dd>
+        <dt>Account type</dt>
+        <dd>Checking account</dd>
+      </dl>
+    </section>
+
+    <section id="stock-panel" class="panel" hidden>
+      <h2>Buy stock</h2>
+      <p class="muted">Practice stocks with made-up prices.</p>
+      <form id="stock-form">
+        <label for="stock">Stock</label>
+        <select id="stock" required>
+          <option value="">Select stock</option>
+          <option value="Demo Tech (DMT)|1200">Demo Tech (DMT) - $1,200</option>
+          <option value="Demo Foods (DFD)|450">Demo Foods (DFD) - $450</option>
+          <option value="Demo Energy (DEN)|3100">Demo Energy (DEN) - $3,100</option>
+        </select>
+        <label for="qty">Number of shares</label>
+        <input id="qty" type="number" min="1" step="1" placeholder="1" required>
+        <p id="stock-total" class="muted">Total: $0.00</p>
+        <p id="stock-msg" class="error" hidden></p>
+        <button type="submit" class="btn">Buy stock</button>
+      </form>
+    </section>
+
+    <section id="card-panel" class="panel" hidden>
+      <h2>Your card</h2>
+            <div id="card-visual" class="card-flip" tabindex="0" role="button" aria-label="Flip card to show details">
+        <div class="card-inner">
+          <div class="card-face card-front">
+            <span class="card-chip"></span>
+            <p class="card-number">•••• •••• •••• 0000</p>
+            <p class="card-meta"><span class="user-name-caps"></span> &nbsp; 12/30</p>
+          </div>
+          <div class="card-face card-back">
+            <p class="card-meta">Card number</p>
+            <p class="card-number">0000 1234 5678 0000</p>
+            <p class="card-meta">Expiry 12/30 &nbsp;&nbsp; CVV 123</p>
+            <p class="card-meta"><span class="user-name-caps"></span></p>
+          </div>
+        </div>
+      </div>
+      <p class="muted">Click the card to see the full details.</p>
+      <p id="card-status" class="muted">Card is active. Demo card, not usable anywhere.</p>
+      <button id="card-toggle" class="btn">Freeze card</button>
+    </section>
+
+    <section class="panel">
+      <h2>Recent transactions</h2>
+      <ul id="transactions" class="tx-list">
+        <li><span>Salary deposit</span><span class="in">+$300,000.00</span></li>
+        <li><span>Electricity bill</span><span class="out">-$12,000.00</span></li>
+        <li><span>Transfer to Access Bank 0123456789</span><span class="out">-$25,000.00</span></li>
+      </ul>
+    </section>
+  </main>
+
+  <button id="chat-open" class="chat-fab">Customer care</button>
+  <aside id="chat-box" class="chat-box" hidden>
+    <div class="chat-head">
+      <strong>Customer care</strong>
+      <button id="chat-close" class="btn-link" aria-label="Close chat">Close</button>
+    </div>
+    <div id="chat-messages" class="chat-messages">
+      <p class="msg agent">Hello! How can we help you today?</p>
+    </div>
+    <form id="chat-form" class="chat-form">
+      <input id="chat-input" type="text" placeholder="Type a message" required>
+      <button type="submit" class="btn">Send</button>
+    </form>
+  </aside>
+  <div id="code-modal" class="modal" hidden>
+    <div class="modal-box">
+      <h2>Enter activation code</h2>
+            <p class="muted">Enter the 6-digit code to confirm.</p>
+                  <p id="code-hint" class="muted"></p>
+      <form id="code-form">
+        <input id="code-input" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit code" required>
+        <p id="code-msg" class="error" hidden></p>
+        <button type="submit" class="btn">Confirm</button>
+        <button type="button" id="code-cancel" class="btn-link">Cancel</button>
+      </form>
+    </div>
+  </div>
+    <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
