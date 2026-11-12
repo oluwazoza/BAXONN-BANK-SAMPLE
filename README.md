@@ -25,3 +25,10 @@ HTML, CSS, JavaScript, Node.js, Express, SQLite (node:sqlite), Socket.IO
 
 ## What I learned
  authentication, keeping money logic on the server, real-time chat.
+
+ ## Screenshots
+![Login](Screenshot 2026-11-12 010947)
+![Dashboard](Screenshot 2026-11-12 011135)
+![Staff chat](Screenshot 2026-11-12 010810)
+![Staff Login](Screenshot 2026-11-12 010627)
+![User Login Authentication](Screenshot 2026-11-12 011027)
