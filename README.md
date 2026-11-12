@@ -2,7 +2,7 @@
 
 A practice banking web app. **Demo only: no real money, no real card or bank data.**
 
-   **Live demo:** https://baxonn-bank-sample.onrender.com/(free hosting: may take about a minute to wake up, and data resets periodically)
+   **Live demo:** https://baxonn-bank-sample.onrender.com (free hosting: may take about a minute to wake up, and data resets periodically)
 
 ## Features
 - Register and log in (passwords hashed with scrypt, sessions in cookies)
