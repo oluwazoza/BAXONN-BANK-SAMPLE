@@ -29,8 +29,8 @@ HTML, CSS, JavaScript, Node.js, Express, SQLite (node:sqlite), Socket.IO
  authentication, keeping money logic on the server, real-time chat.
 
  ## Screenshots
-![Login](screenshots/login.png)
-![Dashboard](Screenshots/dashboard.png)
-![Staff chat](Screenshots/Staff%20chat.png)
-![Staff Login](Screenshots/Staff%20Login.png)
+![Login](screenshots/Login.png)
+![Dashboard](screenshots/Dashboard.png)
+![Staff chat](screenshots/Staff%20chat.png)
+![Staff Login](screenshots/Staff%20Login.png)
 ![User Login Authentication](screenshots/User%20Login%20Authentication.png)
