@@ -63,6 +63,25 @@ module.exports = function setupChat({ app, io, db, crypto, sessionMiddleware }) 
     if (!Number.isInteger(id)) return res.status(400).json({ error: "Bad id." });
     res.json(history(id));
   });
+    app.get("/api/admin/accounts", requireAdmin, (req, res) => {
+    const rows = db.prepare(
+      "SELECT id, name, email, account_number, balance_cents FROM users ORDER BY id DESC"
+    ).all();
+    res.json(rows.map((r) => ({
+      id: r.id, name: r.name, email: r.email,
+      account_number: r.account_number, balance: r.balance_cents / 100
+    })));
+  });
+
+  app.get("/api/admin/all-transactions", requireAdmin, (req, res) => {
+    const rows = db.prepare(`SELECT t.id, u.name, t.label, t.amount_cents, t.created_at
+      FROM transactions t JOIN users u ON u.id = t.user_id
+      ORDER BY t.id DESC LIMIT 200`).all();
+    res.json(rows.map((r) => ({
+      id: r.id, name: r.name, label: r.label,
+      amount: r.amount_cents / 100, created_at: r.created_at
+    })));
+  });
 
   // ---- Live messages (Socket.IO) ----
   io.engine.use(sessionMiddleware); // sockets share the same login session as the pages
