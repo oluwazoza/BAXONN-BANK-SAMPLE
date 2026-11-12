@@ -294,6 +294,7 @@ if (transferForm) {
     addChatMessage({ sender: "agent", text: "Hello! How can we help you today?" });
     rows.forEach(addChatMessage);
   });
+    socket.on("account:update", refreshAll);
   socket.on("chat:message", (m) => {
     addChatMessage(m);
     if (m.sender === "agent" && chatBox.hidden) chatOpen.textContent = "Customer care (new)";

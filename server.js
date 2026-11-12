@@ -99,10 +99,32 @@ function spend(userId, cents, label) {
     throw err;
   }
 }
+// Move money between two BAXONN accounts, all or nothing.
+function transferInternal(fromId, toId, cents, fromLabel, toLabel) {
+  db.exec("BEGIN");
+  try {
+    const r = db.prepare(
+      "UPDATE users SET balance_cents = balance_cents - ? WHERE id = ? AND balance_cents >= ?"
+    ).run(cents, fromId, cents);
+    if (r.changes === 0) {
+      db.exec("ROLLBACK");
+      return false;
+    }
+    db.prepare("UPDATE users SET balance_cents = balance_cents + ? WHERE id = ?").run(cents, toId);
+    db.prepare("INSERT INTO transactions (user_id, label, amount_cents) VALUES (?, ?, ?)")
+      .run(fromId, fromLabel, -cents);
+    db.prepare("INSERT INTO transactions (user_id, label, amount_cents) VALUES (?, ?, ?)")
+      .run(toId, toLabel, cents);
+    db.exec("COMMIT");
+    return true;
+  } catch (err) {
+    db.exec("ROLLBACK");
+    throw err;
+  }
+}
 function balanceOf(userId) {
   return db.prepare("SELECT balance_cents FROM users WHERE id = ?").get(userId).balance_cents;
 }
-
 // ---- Middleware ----
 app.use(express.json());
 const sessionMiddleware = session({
@@ -215,21 +237,41 @@ app.post("/api/send", requireLoginApi, (req, res) => {
   const acct = String(req.body.acct || "").trim();
   const bank = String(req.body.bank || "").trim();
   const cents = Math.round(Number(req.body.amount) * 100);
+  const userId = req.session.userId;
 
   if (!/^\d{10}$/.test(acct)) return res.status(400).json({ error: "Account number must be exactly 10 digits." });
   if (!bank || bank.length > 60) return res.status(400).json({ error: "Choose a bank." });
   if (!Number.isFinite(cents) || cents < 1 || cents > 100000000000) {
     return res.status(400).json({ error: "Enter a valid amount." });
   }
-  if (cents > balanceOf(req.session.userId)) {
+  if (cents > balanceOf(userId)) {
     return res.status(400).json({ error: "Not enough funds. Enter a smaller amount." });
   }
+
+  // Sending to another BAXONN account? Find it first.
+  let recipient = null;
+  if (bank === "BAXONN BANK") {
+    recipient = db.prepare("SELECT id, name FROM users WHERE account_number = ?").get(acct);
+    if (!recipient) return res.status(400).json({ error: "BAXONN BANK account not found." });
+    if (recipient.id === userId) return res.status(400).json({ error: "You can't send money to your own account." });
+  }
+
   const err = checkCode(req, req.body.code);
   if (err) return res.status(403).json({ error: err });
 
-  if (!spend(req.session.userId, cents, "Transfer to " + bank + " " + acct)) {
-    return res.status(400).json({ error: "Not enough funds. Enter a smaller amount." });
+  let ok;
+  if (recipient) {
+    const sender = db.prepare("SELECT name FROM users WHERE id = ?").get(userId);
+    ok = transferInternal(
+      userId, recipient.id, cents,
+      "Transfer to " + recipient.name + " (BAXONN BANK " + acct + ")",
+      "Received from " + sender.name
+    );
+    if (ok) io.to("user:" + recipient.id).emit("account:update");
+  } else {
+    ok = spend(userId, cents, "Transfer to " + bank + " " + acct);
   }
+  if (!ok) return res.status(400).json({ error: "Not enough funds. Enter a smaller amount." });
   res.json({ ok: true });
 });
 
