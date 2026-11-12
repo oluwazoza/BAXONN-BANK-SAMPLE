@@ -2,7 +2,7 @@
 
 A practice banking web app. **Demo only: no real money, no real card or bank data.**
 
-   **Live demo:** https://baxonn-bank-sample.onrender.com (free hosting: may take about a minute to wake up, and data resets periodically)
+   **Live demo:** https://baxonn-bank-sample.onrender.com/(free hosting: may take about a minute to wake up, and data resets periodically)
 
 ## Features
 - Register and log in (passwords hashed with scrypt, sessions in cookies)
@@ -29,8 +29,8 @@ HTML, CSS, JavaScript, Node.js, Express, SQLite (node:sqlite), Socket.IO
  authentication, keeping money logic on the server, real-time chat.
 
  ## Screenshots
-![Login](Screenshot 2026-11-12 010947)
-![Dashboard](Screenshot 2026-11-12 011135)
-![Staff chat](Screenshot 2026-11-12 010810)
-![Staff Login](Screenshot 2026-11-12 010627)
-![User Login Authentication](Screenshot 2026-11-12 011027)
+![Login](screenshots/login.png)
+![Dashboard](Screenshots/dashboard.png)
+![Staff chat](Screenshots/Staff%20chat.png)
+![Staff Login](Screenshots/Staff%20Login.png)
+![User Login Authentication](screenshots/User%20Login%20Authentication.png)
